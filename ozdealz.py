@@ -39,11 +39,8 @@ def send_notification_via_xbmc(title, body):
     json_data = json.dumps(data_send)
     post_data =  json_data.encode('utf-8')
 
-    resp = requests.post(request_url, post_data,
+    requests.post(request_url, post_data,
         headers={'Authorization':authorization, 'Content-Type': 'application/json'})
-
-    # if resp.status_code != 200:
-        # raise Exception('Something wrong when sending message to kodi {0}:{1}'.format(resp.status_code, resp.reason))
 
 def get_deal_box():
     # set our page
@@ -68,27 +65,27 @@ def get_fafa_link(deal):
 
 def get_deal_title(deal):
     dealtag = deal.find('h2', attrs={'class':'title'})
-    return dealtag['data-title'].encode(sys.stdout.encoding, errors='replace')
+    #return dealtag['data-title'].encode(sys.stdout.encoding, errors='replace')
+    return dealtag['data-title'].encode(sys.getdefaultencoding(), errors='replace')
 
 # Set current deal none
-current_deal = []
+current_dealstr = ''
 
 while True:
     deal_box = get_deal_box()
 
     if deal_box.count > 0:
         deal = deal_box[0] # get topmost deal
+        dealstr = get_deal_title(deal)
+        fafalinkstr = get_fafa_link(deal)
 
-        if current_deal != deal:
-            fafalinkstr = get_fafa_link(deal_box[0])
-            dealstr = get_deal_title(deal)
-
+        if current_dealstr != dealstr:
             try:
                 # send_notification_via_pushbullet('Ozdealz', '{0}\n{1}'.format(dealstr,fafalinkstr))
+
+                current_dealstr = dealstr
                 send_notification_via_pushbullet_channel('Ozdealz', '{0}\n{1}'.format(dealstr,fafalinkstr), 'ozdealz')
                 send_notification_via_xbmc('Ozdealz', '{0}\n{1}'.format(dealstr,fafalinkstr))
-
-                current_deal = deal
             except:
                 print 'Exception occured!'
 
