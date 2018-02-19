@@ -25,6 +25,15 @@ def send_notification_via_pushbullet(title, body):
     if resp.status_code != 200:
         raise Exception('Something wrong when sending message to Pushbullet {0}:{1}'.format(resp.status_code, resp.reason))
 
+def send_notification_via_pushbullet_channel(title, body, channel_name):
+    data_send = {"type": "note", "title": title, "body": body, "channel_tag":channel_name}
+
+    resp = requests.post('https://api.pushbullet.com/v2/pushes', data=json.dumps(data_send),
+        headers={'Authorization': 'Bearer ' + ACCESS_TOKEN, 'Content-Type': 'application/json'})
+
+    if resp.status_code != 200:
+        raise Exception('Something wrong when sending message to Pushbullet {0}:{1}'.format(resp.status_code, resp.reason))
+
 def send_notification_via_xbmc(title, body):
     data_send = {"jsonrpc": "2.0", "method": "GUI.ShowNotification", "params": {"title": title, "message": body}, "id": 1}
     json_data = json.dumps(data_send)
@@ -33,8 +42,8 @@ def send_notification_via_xbmc(title, body):
     resp = requests.post(request_url, post_data,
         headers={'Authorization':authorization, 'Content-Type': 'application/json'})
 
-    if resp.status_code != 200:
-        raise Exception('Something wrong when sending message to XBMC {0}:{1}'.format(resp.status_code, resp.reason))
+    # if resp.status_code != 200:
+        # raise Exception('Something wrong when sending message to kodi {0}:{1}'.format(resp.status_code, resp.reason))
 
 def get_deal_box():
     # set our page
@@ -57,24 +66,30 @@ def get_fafa_link(deal):
         return fa_fa_link[0].a.text
     return ''
 
-def get_deal_title(deal_box):
-    deal = deal_box[0].find('h2', attrs={'class':'title'})
-    return deal['data-title'].encode(sys.stdout.encoding, errors='replace')
+def get_deal_title(deal):
+    dealtag = deal.find('h2', attrs={'class':'title'})
+    return dealtag['data-title'].encode(sys.stdout.encoding, errors='replace')
 
 # Set current deal none
-current_deal = ''
+current_deal = []
 
 while True:
     deal_box = get_deal_box()
 
     if deal_box.count > 0:
-        if current_deal != get_deal_title(deal_box):
+        deal = deal_box[0] # get topmost deal
+
+        if current_deal != deal:
             fafalinkstr = get_fafa_link(deal_box[0])
-            dealstr = get_deal_title(deal_box)
+            dealstr = get_deal_title(deal)
 
-            send_notification_via_pushbullet('Ozdealz', '{0}\n{1}'.format(dealstr,fafalinkstr))
-            send_notification_via_xbmc('Ozdealz', '{0}\n{1}'.format(dealstr,fafalinkstr))
+            try:
+                # send_notification_via_pushbullet('Ozdealz', '{0}\n{1}'.format(dealstr,fafalinkstr))
+                send_notification_via_pushbullet_channel('Ozdealz', '{0}\n{1}'.format(dealstr,fafalinkstr), 'ozdealz')
+                send_notification_via_xbmc('Ozdealz', '{0}\n{1}'.format(dealstr,fafalinkstr))
 
-            current_deal = dealstr
+                current_deal = deal
+            except:
+                print 'Exception occured!'
 
     time.sleep(300)  # Run every 5 mins
