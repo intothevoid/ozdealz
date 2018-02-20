@@ -68,6 +68,10 @@ def get_deal_title(deal):
     #return dealtag['data-title'].encode(sys.stdout.encoding, errors='replace')
     return dealtag['data-title'].encode(sys.getdefaultencoding(), errors='replace')
 
+def get_main_link(deal):
+    dealtag = deal.find('h2', attrs={'class':'title'}).find('a')
+    return 'https://www.ozbargain.com.au' + dealtag['href'].encode(sys.getdefaultencoding(), errors='replace')
+
 # Set current deal none
 current_dealstr = ''
 
@@ -76,15 +80,18 @@ while True:
 
     if deal_box.count > 0:
         deal = deal_box[0] # get topmost deal
+
         dealstr = get_deal_title(deal)
         fafalinkstr = get_fafa_link(deal)
+        deal_link = get_main_link(deal)
 
         if current_dealstr != dealstr:
             try:
-                # send_notification_via_pushbullet('Ozdealz', '{0}\n{1}'.format(dealstr,fafalinkstr))
+                # debug
+                # send_notification_via_pushbullet('Ozdealz', '{0}\n\n{1}'.format(dealstr,deal_link))
 
                 current_dealstr = dealstr
-                send_notification_via_pushbullet_channel('Ozdealz', '{0}\n{1}'.format(dealstr,fafalinkstr), 'ozdealz')
+                send_notification_via_pushbullet_channel('Ozdealz', '{0}\n\n{1}'.format(dealstr,deal_link), 'ozdealz')
                 send_notification_via_xbmc('Ozdealz', '{0}\n{1}'.format(dealstr,fafalinkstr))
             except:
                 print 'Exception occured!'
