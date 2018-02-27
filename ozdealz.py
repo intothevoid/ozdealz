@@ -69,7 +69,7 @@ def get_deal_box():
 def get_deal_box_as_dict(deal_box):
     deal_dict = {}
     for deal in deal_box:
-        deal_dict[get_main_link(deal)] = get_deal_title(deal)
+        deal_dict[get_deal_title(deal)] = get_main_link(deal)
 
     return deal_dict
 
@@ -120,17 +120,17 @@ while True:
             try:
                 for key in added:
                     # debug
-                    #send_notification_via_pushbullet('Ozdealz', '{0}\n\n{1}'.format(deal_box_dict[key], str(key)))
+                    # send_notification_via_pushbullet('Ozdealz', '{0}\n\n{1}'.format(deal_box_dict[key], str(key)))
 
-                    send_notification_via_pushbullet_channel('Ozdealz', '{0}\n\n{1}'.format(deal_box_dict[key], str(key)), 'ozdealz')
-                    send_notification_via_xbmc('Ozdealz', '{0}\n{1}'.format(deal_box_dict[key], str(key)))
+                    send_notification_via_pushbullet_channel('Ozdealz', '{0}\n\n{1}'.format(str(key), deal_box_dict[key]), 'ozdealz')
+                    send_notification_via_xbmc('Ozdealz', '{0}\n{1}'.format(str(key), deal_box_dict[key]))
                     time.sleep(1) # wait a second before pushing next deal
 
                     if len(added) > 10: # First script run don't bomb the feed with too many pushes
                         break 
-
-                current_deal_box_dict = deal_box_dict
             except:
                 print 'Exception occured!'
+            
+            current_deal_box_dict = deal_box_dict
 
     time.sleep(300)  # Run every 5 mins
