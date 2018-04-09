@@ -108,29 +108,28 @@ def dict_compare(d1, d2):
 current_deal_box_dict = {}
 
 while True:
-    deal_box = get_deal_box()
+    try:
+        deal_box = get_deal_box()
 
-    if deal_box.count > 0:
-        deal_box_dict = get_deal_box_as_dict(deal_box)
+        if deal_box.count > 0:
+            deal_box_dict = get_deal_box_as_dict(deal_box)
+            added, removed, modified, same = dict_compare(deal_box_dict, current_deal_box_dict)
 
-        added, removed, modified, same = dict_compare(
-            deal_box_dict, current_deal_box_dict)
-
-        if len(added) > 0:
-            try:
+            if len(added) > 0:
                 for key in added:
                     # debug
                     # send_notification_via_pushbullet('Ozdealz', '{0}\n\n{1}'.format(deal_box_dict[key], str(key)))
-
                     send_notification_via_pushbullet_channel('Ozdealz', '{0}\n\n{1}'.format(deal_box_dict[key], str(key)), 'ozdealz')
                     send_notification_via_xbmc('Ozdealz', '{0}\n{1}'.format(deal_box_dict[key], str(key)))
                     time.sleep(1) # wait a second before pushing next deal
 
                     if len(added) > 10: # First script run don't bomb the feed with too many pushes
-                        break 
-            except:
-                print 'Exception occured!'
-            
-            current_deal_box_dict = deal_box_dict
+                        break
 
-    time.sleep(300)  # Run every 5 mins
+                current_deal_box_dict = deal_box_dict
+
+        time.sleep(300)  # Run every 5 mins
+
+    except Exception as e:
+        print e
+        sys.exit(0)
