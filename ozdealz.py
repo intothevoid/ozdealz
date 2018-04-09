@@ -126,7 +126,7 @@ while True:
                     if len(added) > 10: # First script run don't bomb the feed with too many pushes
                         break
 
-                current_deal_box_dict = deal_box_dict
+            current_deal_box_dict = deal_box_dict
 
         time.sleep(300)  # Run every 5 mins
 
