@@ -121,15 +121,16 @@ while True:
                     # send_notification_via_pushbullet('Ozdealz', '{0}\n\n{1}'.format(deal_box_dict[key], str(key)))
                     send_notification_via_pushbullet_channel('Ozdealz', '{0}\n\n{1}'.format(deal_box_dict[key], str(key)), 'ozdealz')
                     send_notification_via_xbmc('Ozdealz', '{0}\n{1}'.format(deal_box_dict[key], str(key)))
-                    time.sleep(1) # wait a second before pushing next deal
+                    time.sleep(5) # wait a second before pushing next deal
 
                     if len(added) > 10: # First script run don't bomb the feed with too many pushes
                         break
-
-            current_deal_box_dict = deal_box_dict
 
         time.sleep(300)  # Run every 5 mins
 
     except Exception as e:
         print e
-        sys.exit(0)
+        #sys.exit(0)
+    
+    finally:
+        current_deal_box_dict = deal_box_dict
