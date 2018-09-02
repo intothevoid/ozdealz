@@ -1,5 +1,6 @@
 import sys
-import urllib2
+from urllib.request import urlopen
+import urllib.error, urllib.parse
 from bs4 import BeautifulSoup
 import requests
 import json
@@ -55,10 +56,13 @@ def get_deal_box():
     deal_page = "https://www.ozbargain.com.au"
 
     # grab the html of the page
-    page = urllib2.urlopen(deal_page)
+    # req = urllib.request.Request(deal_page)
+    # page = urllib.request.urlopen(req)
+    page = requests.get(deal_page)
 
     # parse the html
-    soup = BeautifulSoup(page, 'html.parser')
+    soup = BeautifulSoup(page.text, 'html.parser')
+
     #deal_box = soup.findAll('h2', attrs={'class': 'title'})
     deal_box = soup.findAll(
         'div', attrs={'class': 'node node-ozbdeal node-teaser'})
@@ -70,7 +74,6 @@ def get_deal_box_as_dict(deal_box):
     deal_dict = {}
     for deal in deal_box:
         deal_dict[get_main_link(deal)] = get_deal_title(deal)
-
     return deal_dict
 
 
@@ -83,13 +86,12 @@ def get_fafa_link(deal):
 
 def get_deal_title(deal):
     dealtag = deal.find('h2', attrs={'class': 'title'})
-    # return dealtag['data-title'].encode(sys.stdout.encoding, errors='replace')
-    return dealtag['data-title'].encode(sys.getdefaultencoding(), errors='replace')
+    return str(dealtag['data-title'].encode(sys.getdefaultencoding(), errors='replace'))
 
 
 def get_main_link(deal):
     dealtag = deal.find('h2', attrs={'class': 'title'}).find('a')
-    return 'https://www.ozbargain.com.au' + dealtag['href'].encode(sys.getdefaultencoding(), errors='replace')
+    return 'https://www.ozbargain.com.au' + str(dealtag['href'].encode(sys.getdefaultencoding(), errors='replace'))
 
 
 def dict_compare(d1, d2):
@@ -106,12 +108,13 @@ def dict_compare(d1, d2):
 # Set current deal none
 # current_dealstr = ''
 current_deal_box_dict = {}
+deal_box_dict = {}
 
 while True:
     try:
         deal_box = get_deal_box()
 
-        if deal_box.count > 0:
+        if deal_box is not None:
             deal_box_dict = get_deal_box_as_dict(deal_box)
             added, removed, modified, same = dict_compare(deal_box_dict, current_deal_box_dict)
 
@@ -120,7 +123,7 @@ while True:
                     # debug
                     # send_notification_via_pushbullet('Ozdealz', '{0}\n\n{1}'.format(deal_box_dict[key], str(key)))
                     send_notification_via_pushbullet_channel('Ozdealz', '{0}\n\n{1}'.format(deal_box_dict[key], str(key)), 'ozdealz')
-                    send_notification_via_xbmc('Ozdealz', '{0}\n{1}'.format(deal_box_dict[key], str(key)))
+                    # send_notification_via_xbmc('Ozdealz', '{0}\n{1}'.format(deal_box_dict[key], str(key)))
                     time.sleep(5) # wait a second before pushing next deal
 
                     if len(added) > 10: # First script run don't bomb the feed with too many pushes
@@ -129,7 +132,7 @@ while True:
         time.sleep(300)  # Run every 5 mins
 
     except Exception as e:
-        print e
+        print(e)
         #sys.exit(0)
     
     finally:
