@@ -53,7 +53,7 @@ def send_notification_via_xbmc(title, body):
 
 def get_deal_box():
     # set our page
-    deal_page = "https://www.ozbargain.com.au"
+    deal_page = "http://www.ozbargain.com.au"
 
     # grab the html of the page
     # req = urllib.request.Request(deal_page)
@@ -86,12 +86,12 @@ def get_fafa_link(deal):
 
 def get_deal_title(deal):
     dealtag = deal.find('h2', attrs={'class': 'title'})
-    return str(dealtag['data-title'].encode(sys.getdefaultencoding(), errors='replace'))
+    return str(dealtag['data-title'].encode('utf-8').decode('utf-8'))
 
 
 def get_main_link(deal):
     dealtag = deal.find('h2', attrs={'class': 'title'}).find('a')
-    return 'https://www.ozbargain.com.au' + str(dealtag['href'].encode(sys.getdefaultencoding(), errors='replace'))
+    return 'https://www.ozbargain.com.au' + str(dealtag['href'].encode('utf-8').decode('utf-8'))
 
 
 def dict_compare(d1, d2):
